@@ -8,8 +8,10 @@ prefixes:
  linkml: https://w3id.org/linkml/
  sdo: https://schema.org/
  bint: http://w3id.org/ontogpt/biotic-interactions
- ro:
- dwc:
+ ro: : http://purl.obolibrary.org/obo/
+ dwc: http://rs.tdwg.org/dwc/terms/
+ uberon: http://purl.obolibrary.org/obo/
+ pato: http://purl.obolibrary.org/obo/
 
 default_prefix: bint
 default_curi_maps:
@@ -20,151 +22,275 @@ imports:
  - core
 
 classes:
-  Taxon:
-   is_a: NamedEntity
-   class_uri:
-   description: a group of organisms considered by taxonomists to form a homogeneous unit
-   id_prefixes:
-    - NCBITaxon
-    - EOL 
-   attributes:
-     scientific_name:
-     rank:
-       values_from:
-        - rank_enum 
-# Need clarity around how specimens fit in
-  Specimen:
-    description: An individual organism
+  Organism:
     is_a: NamedEntity
-    attributes:
-    slot_usage:
+    class_uri: dwc:Organism
+    description: A particular organism or defined group of organisms considered to be taxonomically homogeneous.
+    slots:
+     - taxon_name:
+        description: >-
+          Most granular taxonomic name of the subject of the interaction (subject -> source, object -> target). 
+          May not include authorship.
+        slot_uri: dwc:scientificName
+     - taxon_common_name:
+        description: >- 
+          Common (or vernacular) name describing the interaction source (or subject). Maybe a list delimited by 
+          pipes "|" where names may be suffixed by their language code (e.g., "humans @en | mens @nl | mensch @de").
+        slot_uri: dwc:vernacularName
+        multivalued: true
+     - taxon_id:
+        description: >- 
+          Single existing identifier associated with the taxonomic name of the source.
+        slot_uri: dwc:taxonID
+        range: taxonID_enum
+     - taxon_path_ranks:
+        description: >- 
+          Pipe delimited list of taxonomic ranks of the source taxon hierarchy. E.g., NCBI's Homo sapiens 
+          NCBI:9606 ("| superkingdom | clade | kingdom | clade | clade | clade | phylum | subphylum | clade | clade | clade | clade | superclass | clade | clade | clade | class | clade | clade | clade | superorder | order | suborder | infraorder | parvorder | superfamily | family | subfamily | genus | species") 
+          where empty values represent undefined or unknown ranks.
+     - taxon_path_names:
+        description: >- 
+          Pipe limited list of name hierarchy related to the source taxon name. Only includes elements from a single 
+          taxonomic resource. 
+          E.g., \"cellular organisms | Eukaryota | Opisthokonta | Metazoa | Eumetazoa | Bilateria | Deuterostomia | Chordata | Craniata | Vertebrata | Gnathostomata | Teleostomi | Euteleostomi | Sarcopterygii | Dipnotetrapodomorpha | Tetrapoda | Amniota | Mammalia | Theria | Eutheria | Boreoeutheria | Euarchontoglires | Primates | Haplorrhini | Simiiformes | Catarrhini | Hominoidea | Hominidae | Homininae | Homo | Homo sapiens" 
+          for the name hierarchy related to NCBI:9606 Homo sapiens.
+        slot_uri: dwc:HigherTaxon
+     - taxon_path_ids:
+        description: >- 
+          Pipe delimited list of taxonomic identifiers of the source taxon hierarchy. 
+          E.g., NCBI's Homo sapiens NCBI:9606 "NCBI:131567 | NCBI:2759 | NCBI:33154 | NCBI:33208 | NCBI:6072 | NCBI:33213 | NCBI:33511 | NCBI:7711 | NCBI:89593 | NCBI:7742 | NCBI:7776 | NCBI:117570 | NCBI:117571 | NCBI:8287 | NCBI:1338369 | NCBI:32523 | NCBI:32524 | NCBI:40674 | NCBI:32525 | NCBI:9347 | NCBI:1437010 | NCBI:314146 | NCBI:9443 | NCBI:376913 | NCBI:314293 | NCBI:9526 | NCBI:314295 | NCBI:9604 | NCBI:207598 | NCBI:9605 | NCBI:9606" .
+     - body_part:
+        description: body part of the organism participating in the interaction
+        range: body_part_enum
+     - life_stage:
+        description: life stage of the organism participating in the interaction
+        range: life_stage_enum
+        slot_uri: dwc:lifeStage
+     - sex:
+        description: sex of the organism participating in the interaction
+        range: sex_enum
+        slot_uri: dwc:sex
 
   SourceTaxon:
     description: taxon that is the subject of the interaction
     is_a: Taxon
-    attributes:
-      source_taxon_name:
-        description: Most granular taxonomic name of the subject of the interaction (subject -> source, object -> target). Same as DwC scientificName (http://rs.tdwg.org/dwc/terms/scientificName) may not include authorship. If the subject or object not an organism, this may describe an abiotic interaction partner (e.g., "vehicle", "pack of cigarettes").
-      source_taxon_common_name:
-        description: Common (or vernacular) name describing the interaction source (or subject). Same as DwC vernacularName (http://rs.tdwg.org/dwc/terms/vernacularName). Maybe a list delimited by pipes "|" where names may be suffixed by their language code (e.g., "humans @en | mens @nl | mensch @de").
-      source_taxon_external_id:
-        description: Single existing identifier associated with the taxonomic name of the source. Ids are prefixed using the schemes documented in https://api.globalbioticinteractions.org/prefixes (e.g., NCBI:9606 refers to NCBI's Taxon ID relating to Homo sapiens). Same as DwC taxonID (http://rs.tdwg.org/dwc/terms/taxonID).
-      source_taxon_path_ranks:
-        description: Pipe delimited list of taxonomic ranks of the source taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 ("| superkingdom | clade | kingdom | clade | clade | clade | phylum | subphylum | clade | clade | clade | clade | superclass | clade | clade | clade | class | clade | clade | clade | superorder | order | suborder | infraorder | parvorder | superfamily | family | subfamily | genus | species") where empty values represent undefined or unknown ranks.
-      source_taxon_path:
-        description: Pipe limited list of name hierarchy related to the source taxon name. Only includes elements from a single taxonomic resource. Same as DwC HigherTaxon (http://rs.tdwg.org/dwc/terms/HigherTaxon) E.g., \"cellular organisms | Eukaryota | Opisthokonta | Metazoa | Eumetazoa | Bilateria | Deuterostomia | Chordata | Craniata | Vertebrata | Gnathostomata | Teleostomi | Euteleostomi | Sarcopterygii | Dipnotetrapodomorpha | Tetrapoda | Amniota | Mammalia | Theria | Eutheria | Boreoeutheria | Euarchontoglires | Primates | Haplorrhini | Simiiformes | Catarrhini | Hominoidea | Hominidae | Homininae | Homo | Homo sapiens" for the name hierarchy related to NCBI:9606 Homo sapiens.
-      source_taxon_path_ids:
-        description: Pipe delimited list of taxonomic identifiers of the source taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 "NCBI:131567 | NCBI:2759 | NCBI:33154 | NCBI:33208 | NCBI:6072 | NCBI:33213 | NCBI:33511 | NCBI:7711 | NCBI:89593 | NCBI:7742 | NCBI:7776 | NCBI:117570 | NCBI:117571 | NCBI:8287 | NCBI:1338369 | NCBI:32523 | NCBI:32524 | NCBI:40674 | NCBI:32525 | NCBI:9347 | NCBI:1437010 | NCBI:314146 | NCBI:9443 | NCBI:376913 | NCBI:314293 | NCBI:9526 | NCBI:314295 | NCBI:9604 | NCBI:207598 | NCBI:9605 | NCBI:9606" .
 
   TargetTaxon:
     description: taxon that is the target of the interaction
     is_a: Taxon
-    attributes:
-      target_taxon_name:
-        description: Most granular taxonomic name of the target of the interaction (subject -> source, object -> target). Same as DwC scientificName (http://rs.tdwg.org/dwc/terms/scientificName) may not include authorship. If the subject or object not an organism, this may describe an abiotic interaction partner (e.g., "vehicle", "pack of cigarettes").
-      target_taxon_common_name:
-        description: Common (or vernacular) name describing the interaction target (or object). Same as DwC vernacularName (http://rs.tdwg.org/dwc/terms/vernacularName). Maybe a list delimited by pipes "|" where names may be suffixed by their language code (e.g., "humans @en | mens @nl | mensch @de").
-      target_taxon_external_id:
-        description: Single existing identifier associated with the taxonomic name of the target. Ids are prefixed using the schemes documented in https://api.globalbioticinteractions.org/prefixes (e.g., NCBI:9606 refers to NCBI's Taxon ID relating to Homo sapiens). Same as DwC taxonID (http://rs.tdwg.org/dwc/terms/taxonID).
-      target_taxon_path_ranks:
-        description: Pipe delimited list of taxonomic ranks of the target taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 ("| superkingdom | clade | kingdom | clade | clade | clade | phylum | subphylum | clade | clade | clade | clade | superclass | clade | clade | clade | class | clade | clade | clade | superorder | order | suborder | infraorder | parvorder | superfamily | family | subfamily | genus | species") where empty values represent undefined or unknown ranks.
-      target_taxon_path:
-        description: Pipe limited list of name hierarchy related to the target taxon name. Only includes elements from a single taxonomic resource. Same as DwC HigherTaxon (http://rs.tdwg.org/dwc/terms/HigherTaxon) E.g., \"cellular organisms | Eukaryota | Opisthokonta | Metazoa | Eumetazoa | Bilateria | Deuterostomia | Chordata | Craniata | Vertebrata | Gnathostomata | Teleostomi | Euteleostomi | Sarcopterygii | Dipnotetrapodomorpha | Tetrapoda | Amniota | Mammalia | Theria | Eutheria | Boreoeutheria | Euarchontoglires | Primates | Haplorrhini | Simiiformes | Catarrhini | Hominoidea | Hominidae | Homininae | Homo | Homo sapiens" for the name hierarchy related to NCBI:9606 Homo sapiens.
-      target_taxon_path_ids:
-        description: Pipe delimited list of taxonomic identifiers of the target taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 "NCBI:131567 | NCBI:2759 | NCBI:33154 | NCBI:33208 | NCBI:6072 | NCBI:33213 | NCBI:33511 | NCBI:7711 | NCBI:89593 | NCBI:7742 | NCBI:7776 | NCBI:117570 | NCBI:117571 | NCBI:8287 | NCBI:1338369 | NCBI:32523 | NCBI:32524 | NCBI:40674 | NCBI:32525 | NCBI:9347 | NCBI:1437010 | NCBI:314146 | NCBI:9443 | NCBI:376913 | NCBI:314293 | NCBI:9526 | NCBI:314295 | NCBI:9604 | NCBI:207598 | NCBI:9605 | NCBI:9606" .
 
-#One possible way to model an interaction
-  Interaction:
-    description: 
+  AbioticEntity:
+    description: any non-living material entity
     is_a: NamedEntity
-    id_prefixes:
-      - RO
-    attributes:
-      label:
-        description: the name of the interaction
-        range: string
-      latitude:
-        description: Same as DwC decimalLatitude (http://rs.tdwg.org/dwc/terms/decimalLatitude)
-        range: float
-      longitude:
-        description: Same as DwC decimalLongitude (http://rs.tdwg.org/dwc/terms/decimalLongitude).
-      altitude:
-        description: Similar to elevation and expressed in meters. Negative altitude describes depth related to sea level.
-        range: float
-      footprintWKT:
-        description: Same as DwC footprintWKT (http://rs.tdwg.org/dwc/terms/footprintWKT).
-      locality:
-        description: Same as DwC locality (http://rs.tdwg.org/dwc/terms/locality).
-      event_date:
-        description: Same as DwC eventDate (http://rs.tdwg.org/dwc/terms/eventDate).
-        range: dateTime
-      study:
-        range: Study
-    slot_usage:
-      source_taxon:
-        required: true
-        range: SourceTaxon
-      target_taxon:
-        required: true
-        range: TargetTaxon
-#Another possible way to model an interaction
+    slots:
+     - type:
+        description: specific type of abiotic entity
+        range: abiotic_enum
+
   Interaction:
+    description: >- 
+      An interaction relationship in which at least one of the partners is an organism and the other is either 
+      an organism or an abiotic entity with which the organism interacts.
+    is_a: NamedEntity
+    class_uri: RO:0002437
+    slots:
+     - type:
+        description: specifc type of interaction - should always be RO term
+        range: interaction_enum
+     - latitude:
+        description: >- 
+          The geographic latitude (in decimal degrees, using the spatial reference system given in geodeticDatum) 
+          of the geographic center of a Location. Positive values are north of the Equator, negative values are south 
+          of it.
+        range: float
+        slot_uri: dwc:decimalLatitude
+        minimum_value: -90.0
+        maximum_value: 90.0
+     - longitude:
+        description: >- 
+          The geographic longitude (in decimal degrees, using the spatial reference system given in geodeticDatum) 
+          of the geographic center of a Location. Positive values are east of the Greenwich Meridian, negative values 
+          are west of it.
+        range: float
+        slot_uri: dwc:decimalLongitude
+        minimum_value: -180.0
+        maximum_value: 180.0
+     - altitude:
+        description: >- 
+          Similar to elevation and expressed in meters. Negative altitude describes depth related to sea level.
+        range: Altitude
+     - footprintWKT:
+        description: >- 
+          A Well-Known Text (WKT) representation of the shape (footprint, geometry) that defines the Location. 
+          A Location may have both a point-radius representation (see decimalLatitude) and a footprint representation, 
+          and they may differ from each other.
+        slot_uri: dwc:footprintWKT
+     - locality:
+        description: >- 
+          The specific description of a place
+        slot_uri: dwc:locality
+     - event_date:
+        description: >- 
+          The date-time or interval during which the interaction occurred. Not suitable for a time in a geological context.
+        range: date
+        slot_uri: dwc:eventDate
+     - study:
+        range: Study
+
+  Biotic_Interaction:
     is_a: Triple
-    description: A triple where the .
-    id:
-      identifier: true
+    description: A triple describing an interaction between two biotic entities.
+    class_uri: RO:0002574
     slot_usage:
-      subject:
+     - id:
+       identifier: true
+       slot_uri: schema:identifier
+     - subject:
         range: SourceTaxon
         description: taxon that is the subject of the interaction
-      object:
+     - object:
         range: TargetTaxon
         description: taxon that is the object of the interaction
-      predicate:
-        range: InteractionType
-        description: The relationship type
-      subject_qualifier:
-        range: NamedEntity
-        description: An optional qualifier or modifier for the source taxon
-      object_qualifier:
-        range: NamedEntity
-        description: An optional qualifier or modifier for the target taxon
-      study:
+     - predicate:
+        range: Interaction
+        description: The specific type of interaction observed
+     - study:
         range: Study
 
-  InteractionType:
-    is_a: RelationshipType
-    description:
-    id_prefix:
-     - RO
+  Abiotic_Interaction:
+    is_a: Triple
+    description: A triple describing an interaction between a biotic entity and an abiotic entity.
+    class_uri: RO:0002446
+    slot_usage:
+     - id:
+        identifier: true
+        slot_uri: schema:identifier
+     - subject:
+        range: SourceTaxon
+        description: taxon that is the subject of the interaction
+     - object: #I'm assuming that all abiotic entities will be the object, but I'm not sure
+        range: AbioticEntity
+        description: abiotic entity that is the object of the interaction
+     - predicate:
+        range: Interaction
+        description: The specific type of interaction observed
+     - study:
+        range: Study
 
   Study:
     description: source of the interaction data or observation
     is_a: NamedEntity
     attributes:
       study_title:
-        description: Internal non-unique identifier used to refer to a specific claim, or group of claims.
+        description: >- 
+          Internal non-unique identifier used to refer to a specific claim, or group of claims.
       study_url:
-        description: URL associated with the recorded interaction claim (e.g., "http://www.stoppinginvasives.org/dotAsset/6d3c1060-971d-4e12-bf0e-9d34aefb998c.pdf").
+        description: >- 
+          URL associated with the recorded interaction claim 
+          (e.g., "http://www.stoppinginvasives.org/dotAsset/6d3c1060-971d-4e12-bf0e-9d34aefb998c.pdf").
       study_doi:
-        description: DOI associated with the recorded interaction claim (e.g., "10.2317/JKES0811.17.1").
+        description: >- 
+          DOI associated with the recorded interaction claim (e.g., "10.2317/JKES0811.17.1").
       study_citation:
-        description: Citation associated with the recorded interaction claim. (e.g., "Kern, W.H. (2004). Dealing with Iguanas in the South Florida Landscape ENY-714/IN528, 8/2004. EDIS, 2004(15).
+        description: >- 
+          Citation associated with the recorded interaction claim. (e.g., "Kern, W.H. (2004). 
+          Dealing with Iguanas in the South Florida Landscape ENY-714/IN528, 8/2004. EDIS, 2004(15).
       study_source_citation:
-        description: Citation associated with the datasets containing the recorded interaction claim. (e.g., "Sabina E. Vlad, Jodey Peyton & Sofie Meeus. 2022. Interactions data on *Iguana iguana* and other taxa from the Cayman Islands."
+        description: >- 
+          Citation associated with the datasets containing the recorded interaction claim. 
+          (e.g., "Sabina E. Vlad, Jodey Peyton & Sofie Meeus. 2022. Interactions data on *Iguana 
+          iguana* and other taxa from the Cayman Islands."
       study_source_id:
-        description: Internal identifier (or namespace) for dataset containing the recorded interaction claim. (e.g., "globalbioticinteractions/jeught2021").
+        description: >- 
+          Internal identifier (or namespace) for dataset containing the recorded interaction claim. 
+          (e.g., "globalbioticinteractions/jeught2021").
       study_source_doi:
-        description: DOI (i.e., https://doi.org) associated with the datasets containing the recorded interaction claim (e.g., "10.5281/zenodo.1436853").
+        description: >- 
+          DOI (i.e., https://doi.org) associated with the datasets containing the recorded 
+          interaction claim (e.g., "10.5281/zenodo.1436853").
       study_source_format:
-        description: format of the dataset containing the recorded interaction claim (e.g., "dwca")
+        description: >- 
+          format of the dataset containing the recorded interaction claim (e.g., "dwca")
       study_source_archive_url:
-        description: URI of the datasets containing the recorded interaction claim (e.g., https://zenodo.org/record/1436853/files/globalbioticinteractions/template-dataset-0.0.3.zip)
+        description: >-
+          URI of the datasets containing the recorded interaction claim 
+          (e.g., https://zenodo.org/record/1436853/files/globalbioticinteractions/template-dataset-0.0.3.zip)
       study_source_last_seen_at:
-        description: date/time in ISO8601 describing when the dataset containing the recorded interaction claim was last seen. (e.g., "2022-05-06T14:30:42.917Z")
+        description: >- 
+          date/time in ISO8601 describing when the dataset containing the recorded interaction 
+          claim was last seen. (e.g., "2022-05-06T14:30:42.917Z")
         range: dateTime
 
-enums:
-  ranks:
-    permissible_values:
-  
+  Altitude:
+    is_a: CompoundExpression
+    attributes:
+      value:
+        description: the value of the altitude
+        range: float
+      length_unit:
+        description: the unit of the altitude
+        range: LengthUnit
+
+  LengthUnit:
+    is_a: NamedEntity
+    id_prefixes:
+     - UO
+    range: length_unit_enum
+
+enums: #how can I pull enums from multiple ontologies?
+  body_part_enum:
+    reachable_from:
+      source_ontology: obo:uberon
+      source_nodes:
+       - UBERON:0001062
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  life_stage_enum:
+    reachable_from:
+      source_ontology: obo:uberon
+      source_nodes:
+       - UBERON:0000104
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  interaction_enum:
+    reachable_from:
+      source_ontology: obo:rp
+      source_nodes:
+       - RO:0002437
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  sex_enum:
+    reachable_from:
+      source_ontology: obo:pato
+      source_nodes:
+       - PATO:0000047
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  taxonID_enum: #https://api.globalbioticinteractions.org/prefixes
+    reachable_from:
+      source_ontology: obo:NCBITaxon
+      source_nodes:
+       - NCBITaxon:1
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  abiotic_enum:
+    reachable_from:
+      source_ontology: obo:ENVO
+      source_nodes:
+       - ENVO:00010483
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
+  length_unit_enum:
+    reachable_from:
+      source_ontology: obo:uo
+      source_nodes:
+       - UO:0000001
+      include_self: false
+      relationship_types:
+       - rdfs:subClassOf
