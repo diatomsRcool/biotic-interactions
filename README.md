@@ -1,3 +1,6 @@
-# Placeholder README
-This file will be replaced in the build process.  The details about how to use this template
-can be found in [ABOUT.md](./ABOUT.md).
+# LinkML A biotic interaction model in LinkML for use with OntoGPT
+This model describes biotic interactions 
+with metadata about provenance and attribution
+originally based on GloBI data model
+
+## [Documentation](https://diatomsRcool.github.io/biotic-interactions/)

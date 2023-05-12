@@ -1,0 +1,170 @@
+id: http://w3id.org/ontogpt/biotic-interactions
+title: Biotic Interactions LinkML model
+name: biotic-interactions
+license: https://creativecommons.org/publicdomain/zero/1.0/
+version: 0.0.1
+
+prefixes:
+ linkml: https://w3id.org/linkml/
+ sdo: https://schema.org/
+ bint: http://w3id.org/ontogpt/biotic-interactions
+ ro:
+ dwc:
+
+default_prefix: bint
+default_curi_maps:
+ - semweb_context
+
+imports:
+ - linkml:types
+ - core
+
+classes:
+  Taxon:
+   is_a: NamedEntity
+   class_uri:
+   description: a group of organisms considered by taxonomists to form a homogeneous unit
+   id_prefixes:
+    - NCBITaxon
+    - EOL 
+   attributes:
+     scientific_name:
+     rank:
+       values_from:
+        - rank_enum 
+# Need clarity around how specimens fit in
+  Specimen:
+    description: An individual organism
+    is_a: NamedEntity
+    attributes:
+    slot_usage:
+
+  SourceTaxon:
+    description: taxon that is the subject of the interaction
+    is_a: Taxon
+    attributes:
+      source_taxon_name:
+        description: Most granular taxonomic name of the subject of the interaction (subject -> source, object -> target). Same as DwC scientificName (http://rs.tdwg.org/dwc/terms/scientificName) may not include authorship. If the subject or object not an organism, this may describe an abiotic interaction partner (e.g., "vehicle", "pack of cigarettes").
+      source_taxon_common_name:
+        description: Common (or vernacular) name describing the interaction source (or subject). Same as DwC vernacularName (http://rs.tdwg.org/dwc/terms/vernacularName). Maybe a list delimited by pipes "|" where names may be suffixed by their language code (e.g., "humans @en | mens @nl | mensch @de").
+      source_taxon_external_id:
+        description: Single existing identifier associated with the taxonomic name of the source. Ids are prefixed using the schemes documented in https://api.globalbioticinteractions.org/prefixes (e.g., NCBI:9606 refers to NCBI's Taxon ID relating to Homo sapiens). Same as DwC taxonID (http://rs.tdwg.org/dwc/terms/taxonID).
+      source_taxon_path_ranks:
+        description: Pipe delimited list of taxonomic ranks of the source taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 ("| superkingdom | clade | kingdom | clade | clade | clade | phylum | subphylum | clade | clade | clade | clade | superclass | clade | clade | clade | class | clade | clade | clade | superorder | order | suborder | infraorder | parvorder | superfamily | family | subfamily | genus | species") where empty values represent undefined or unknown ranks.
+      source_taxon_path:
+        description: Pipe limited list of name hierarchy related to the source taxon name. Only includes elements from a single taxonomic resource. Same as DwC HigherTaxon (http://rs.tdwg.org/dwc/terms/HigherTaxon) E.g., \"cellular organisms | Eukaryota | Opisthokonta | Metazoa | Eumetazoa | Bilateria | Deuterostomia | Chordata | Craniata | Vertebrata | Gnathostomata | Teleostomi | Euteleostomi | Sarcopterygii | Dipnotetrapodomorpha | Tetrapoda | Amniota | Mammalia | Theria | Eutheria | Boreoeutheria | Euarchontoglires | Primates | Haplorrhini | Simiiformes | Catarrhini | Hominoidea | Hominidae | Homininae | Homo | Homo sapiens" for the name hierarchy related to NCBI:9606 Homo sapiens.
+      source_taxon_path_ids:
+        description: Pipe delimited list of taxonomic identifiers of the source taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 "NCBI:131567 | NCBI:2759 | NCBI:33154 | NCBI:33208 | NCBI:6072 | NCBI:33213 | NCBI:33511 | NCBI:7711 | NCBI:89593 | NCBI:7742 | NCBI:7776 | NCBI:117570 | NCBI:117571 | NCBI:8287 | NCBI:1338369 | NCBI:32523 | NCBI:32524 | NCBI:40674 | NCBI:32525 | NCBI:9347 | NCBI:1437010 | NCBI:314146 | NCBI:9443 | NCBI:376913 | NCBI:314293 | NCBI:9526 | NCBI:314295 | NCBI:9604 | NCBI:207598 | NCBI:9605 | NCBI:9606" .
+
+  TargetTaxon:
+    description: taxon that is the target of the interaction
+    is_a: Taxon
+    attributes:
+      target_taxon_name:
+        description: Most granular taxonomic name of the target of the interaction (subject -> source, object -> target). Same as DwC scientificName (http://rs.tdwg.org/dwc/terms/scientificName) may not include authorship. If the subject or object not an organism, this may describe an abiotic interaction partner (e.g., "vehicle", "pack of cigarettes").
+      target_taxon_common_name:
+        description: Common (or vernacular) name describing the interaction target (or object). Same as DwC vernacularName (http://rs.tdwg.org/dwc/terms/vernacularName). Maybe a list delimited by pipes "|" where names may be suffixed by their language code (e.g., "humans @en | mens @nl | mensch @de").
+      target_taxon_external_id:
+        description: Single existing identifier associated with the taxonomic name of the target. Ids are prefixed using the schemes documented in https://api.globalbioticinteractions.org/prefixes (e.g., NCBI:9606 refers to NCBI's Taxon ID relating to Homo sapiens). Same as DwC taxonID (http://rs.tdwg.org/dwc/terms/taxonID).
+      target_taxon_path_ranks:
+        description: Pipe delimited list of taxonomic ranks of the target taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 ("| superkingdom | clade | kingdom | clade | clade | clade | phylum | subphylum | clade | clade | clade | clade | superclass | clade | clade | clade | class | clade | clade | clade | superorder | order | suborder | infraorder | parvorder | superfamily | family | subfamily | genus | species") where empty values represent undefined or unknown ranks.
+      target_taxon_path:
+        description: Pipe limited list of name hierarchy related to the target taxon name. Only includes elements from a single taxonomic resource. Same as DwC HigherTaxon (http://rs.tdwg.org/dwc/terms/HigherTaxon) E.g., \"cellular organisms | Eukaryota | Opisthokonta | Metazoa | Eumetazoa | Bilateria | Deuterostomia | Chordata | Craniata | Vertebrata | Gnathostomata | Teleostomi | Euteleostomi | Sarcopterygii | Dipnotetrapodomorpha | Tetrapoda | Amniota | Mammalia | Theria | Eutheria | Boreoeutheria | Euarchontoglires | Primates | Haplorrhini | Simiiformes | Catarrhini | Hominoidea | Hominidae | Homininae | Homo | Homo sapiens" for the name hierarchy related to NCBI:9606 Homo sapiens.
+      target_taxon_path_ids:
+        description: Pipe delimited list of taxonomic identifiers of the target taxon hierarchy. E.g., NCBI's Homo sapiens NCBI:9606 "NCBI:131567 | NCBI:2759 | NCBI:33154 | NCBI:33208 | NCBI:6072 | NCBI:33213 | NCBI:33511 | NCBI:7711 | NCBI:89593 | NCBI:7742 | NCBI:7776 | NCBI:117570 | NCBI:117571 | NCBI:8287 | NCBI:1338369 | NCBI:32523 | NCBI:32524 | NCBI:40674 | NCBI:32525 | NCBI:9347 | NCBI:1437010 | NCBI:314146 | NCBI:9443 | NCBI:376913 | NCBI:314293 | NCBI:9526 | NCBI:314295 | NCBI:9604 | NCBI:207598 | NCBI:9605 | NCBI:9606" .
+
+#One possible way to model an interaction
+  Interaction:
+    description: 
+    is_a: NamedEntity
+    id_prefixes:
+      - RO
+    attributes:
+      label:
+        description: the name of the interaction
+        range: string
+      latitude:
+        description: Same as DwC decimalLatitude (http://rs.tdwg.org/dwc/terms/decimalLatitude)
+        range: float
+      longitude:
+        description: Same as DwC decimalLongitude (http://rs.tdwg.org/dwc/terms/decimalLongitude).
+      altitude:
+        description: Similar to elevation and expressed in meters. Negative altitude describes depth related to sea level.
+        range: float
+      footprintWKT:
+        description: Same as DwC footprintWKT (http://rs.tdwg.org/dwc/terms/footprintWKT).
+      locality:
+        description: Same as DwC locality (http://rs.tdwg.org/dwc/terms/locality).
+      event_date:
+        description: Same as DwC eventDate (http://rs.tdwg.org/dwc/terms/eventDate).
+        range: dateTime
+      study:
+        range: Study
+    slot_usage:
+      source_taxon:
+        required: true
+        range: SourceTaxon
+      target_taxon:
+        required: true
+        range: TargetTaxon
+#Another possible way to model an interaction
+  Interaction:
+    is_a: Triple
+    description: A triple where the .
+    id:
+      identifier: true
+    slot_usage:
+      subject:
+        range: SourceTaxon
+        description: taxon that is the subject of the interaction
+      object:
+        range: TargetTaxon
+        description: taxon that is the object of the interaction
+      predicate:
+        range: InteractionType
+        description: The relationship type
+      subject_qualifier:
+        range: NamedEntity
+        description: An optional qualifier or modifier for the source taxon
+      object_qualifier:
+        range: NamedEntity
+        description: An optional qualifier or modifier for the target taxon
+      study:
+        range: Study
+
+  InteractionType:
+    is_a: RelationshipType
+    description:
+    id_prefix:
+     - RO
+
+  Study:
+    description: source of the interaction data or observation
+    is_a: NamedEntity
+    attributes:
+      study_title:
+        description: Internal non-unique identifier used to refer to a specific claim, or group of claims.
+      study_url:
+        description: URL associated with the recorded interaction claim (e.g., "http://www.stoppinginvasives.org/dotAsset/6d3c1060-971d-4e12-bf0e-9d34aefb998c.pdf").
+      study_doi:
+        description: DOI associated with the recorded interaction claim (e.g., "10.2317/JKES0811.17.1").
+      study_citation:
+        description: Citation associated with the recorded interaction claim. (e.g., "Kern, W.H. (2004). Dealing with Iguanas in the South Florida Landscape ENY-714/IN528, 8/2004. EDIS, 2004(15).
+      study_source_citation:
+        description: Citation associated with the datasets containing the recorded interaction claim. (e.g., "Sabina E. Vlad, Jodey Peyton & Sofie Meeus. 2022. Interactions data on *Iguana iguana* and other taxa from the Cayman Islands."
+      study_source_id:
+        description: Internal identifier (or namespace) for dataset containing the recorded interaction claim. (e.g., "globalbioticinteractions/jeught2021").
+      study_source_doi:
+        description: DOI (i.e., https://doi.org) associated with the datasets containing the recorded interaction claim (e.g., "10.5281/zenodo.1436853").
+      study_source_format:
+        description: format of the dataset containing the recorded interaction claim (e.g., "dwca")
+      study_source_archive_url:
+        description: URI of the datasets containing the recorded interaction claim (e.g., https://zenodo.org/record/1436853/files/globalbioticinteractions/template-dataset-0.0.3.zip)
+      study_source_last_seen_at:
+        description: date/time in ISO8601 describing when the dataset containing the recorded interaction claim was last seen. (e.g., "2022-05-06T14:30:42.917Z")
+        range: dateTime
+
+enums:
+  ranks:
+    permissible_values:
+  
